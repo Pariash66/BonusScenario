@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <RootNamespace>congestion_tax_calculator_bussiness</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\congestion-tax-calculator-dataModel\congestion-tax-calculator-dataModel.csproj" />
+  </ItemGroup>
+
+</Project>
