@@ -2,6 +2,7 @@
 using congestion_tax_calculator_dataModel.Data;
 using congestion_tax_calculator_dataModel.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -29,38 +30,49 @@ namespace congestion_tax_calculator_bussiness
         }
         public int GetTax()
         {
-            DateTime intervalStart = _Date[0];
-            int totalFee = 0;
-            int tempFee = 0;
-            Repository<CityOtherRule> cityotherRule = new Repository<CityOtherRule>(_DbContext);
-            List<CityOtherRule> rules = cityotherRule.GetAll().Where(c => c.CityFk == _City.IdCity).ToList();
-            int singleCharge = (int)rules.Where(c => c.RuleCode == (int)otherRules.SingleChargeDuration).FirstOrDefault().Amount;
-            int MaxCharge = (int)rules.Where(c => c.RuleCode == (int)otherRules.MaxTaxPerDay).FirstOrDefault().Amount;
-            foreach (DateTime date in _Date)
+            try
             {
-                //int nextFee = GetTollFee(date, vehicle);
-                GetTollFee getTollFee = new GetTollFee(_City, _DbContext, _Vehicle, date);
-
-                TimeSpan diffInMillies = date - intervalStart;
-                double minutes = diffInMillies.TotalMinutes;
-
-                if (minutes <= singleCharge)
+                Array.Sort(_Date);
+                DateTime intervalStart = _Date[0];
+                int totalFee = 0;
+                int tempFee = 0;
+                int prevFee = 0;
+                Repository<CityOtherRule> cityotherRule = new Repository<CityOtherRule>(_DbContext);
+                List<CityOtherRule> rules = cityotherRule.GetAll().Where(c => c.CityFk == _City.IdCity).ToList();
+                int singleCharge = (int)rules.Where(c => c.RuleCode == (int)otherRules.SingleChargeDuration).FirstOrDefault().Amount;
+                int MaxCharge = (int)rules.Where(c => c.RuleCode == (int)otherRules.MaxTaxPerDay).FirstOrDefault().Amount;
+                foreach (DateTime date in _Date)
                 {
+                    //int nextFee = GetTollFee(date, vehicle);
+                    GetTollFee getTollFee = new GetTollFee(_City, _DbContext, _Vehicle, date);
+
+                    TimeSpan diffInMillies = date - intervalStart;
+                    double minutes = diffInMillies.TotalMinutes;
                     int Fee = getTollFee.IsTollFeeFunc();
-                    tempFee = Math.Max(Fee, tempFee);
-                }
-                else
-                {
 
-                    intervalStart = date;
+                    if (minutes <= singleCharge)
+                    {
+                        tempFee = Math.Max(Fee, tempFee);
+                        totalFee -= prevFee;
+                        prevFee = 0;
+                    }
+                    else
+                    {
 
-                    totalFee += tempFee;
-                    tempFee = 0;
+                        intervalStart = date;
+                        prevFee = Fee;
+                        totalFee += tempFee+Fee;
+                        tempFee = 0;
+                    }
                 }
+                totalFee += tempFee;
+
+                return Math.Min(totalFee, MaxCharge);
             }
-            totalFee += tempFee;
-
-            return Math.Max(totalFee, MaxCharge); ;
+            catch (Exception ex)
+            {
+                throw;
+            }
         }
 
        

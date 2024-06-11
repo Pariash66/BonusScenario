@@ -22,17 +22,24 @@ namespace congestion_tax_calculator_bussiness
         }
         public bool IsTollFreeVehicleFunc()
         {
-            if (_vehicle == null) return false;
+            try
+            {
+                if (_vehicle == null) return false;
 
-            IRepository<CityExceptionVehicle> r = new Repository<CityExceptionVehicle>(_DbContext);
-            return r.GetAll().Where(c => c.CityFk == _city.IdCity && c.VehicleFk == _vehicle.IdVehicle).Count() > 0 ? true : false;
-            //String vehicleType = vehicle.GetVehicleType();
-            //return vehicleType.Equals(TollFreeVehicles.Motorcycle.ToString()) ||
-            //       vehicleType.Equals(TollFreeVehicles.Tractor.ToString()) ||
-            //       vehicleType.Equals(TollFreeVehicles.Emergency.ToString()) ||
-            //       vehicleType.Equals(TollFreeVehicles.Diplomat.ToString()) ||
-            //       vehicleType.Equals(TollFreeVehicles.Foreign.ToString()) ||
-            //       vehicleType.Equals(TollFreeVehicles.Military.ToString());
+                IRepository<CityExceptionVehicle> r = new Repository<CityExceptionVehicle>(_DbContext);
+                return r.GetAll().Where(c => c.CityFk == _city.IdCity && c.VehicleFk == _vehicle.IdVehicle).Count() > 0 ? true : false;
+                //String vehicleType = vehicle.GetVehicleType();
+                //return vehicleType.Equals(TollFreeVehicles.Motorcycle.ToString()) ||
+                //       vehicleType.Equals(TollFreeVehicles.Tractor.ToString()) ||
+                //       vehicleType.Equals(TollFreeVehicles.Emergency.ToString()) ||
+                //       vehicleType.Equals(TollFreeVehicles.Diplomat.ToString()) ||
+                //       vehicleType.Equals(TollFreeVehicles.Foreign.ToString()) ||
+                //       vehicleType.Equals(TollFreeVehicles.Military.ToString());
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
 
         }
 
